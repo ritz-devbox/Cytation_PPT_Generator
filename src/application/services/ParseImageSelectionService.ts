@@ -1,4 +1,4 @@
-import type { InputFile } from "../../domain/models/InputFile";
+import { datasetNameFromPath, type InputFile } from "../../domain/models/InputFile";
 import type { ParsedImage } from "../../domain/models/ParsedImage";
 import type { ValidationIssue } from "../../domain/models/ValidationIssue";
 
@@ -9,14 +9,10 @@ export interface ParsedSelection {
 
 const coordinatePattern = /_([a-z]+)(\d+)_/i;
 const supportedExtensions = new Set(["jpg", "jpeg"]);
+const companionExtensions = new Set(["xlsx"]);
 
 function extensionOf(filename: string): string {
   return filename.includes(".") ? (filename.split(".").pop()?.toLowerCase() ?? "") : "";
-}
-
-function datasetFromPath(relativePath: string): string {
-  const parts = relativePath.replaceAll("\\", "/").split("/").filter(Boolean);
-  return parts.length > 1 ? parts.at(-2) ?? "Images" : "Images";
 }
 
 export class ParseImageSelectionService {
@@ -25,7 +21,11 @@ export class ParseImageSelectionService {
     const issues: ValidationIssue[] = [];
 
     for (const file of files) {
-      if (!supportedExtensions.has(extensionOf(file.name))) {
+      const extension = extensionOf(file.name);
+      if (companionExtensions.has(extension)) {
+        continue;
+      }
+      if (!supportedExtensions.has(extension)) {
         issues.push({
           code: "unsupported-file",
           severity: "warning",
@@ -57,7 +57,7 @@ export class ParseImageSelectionService {
       }
 
       images.push({
-        datasetName: datasetFromPath(file.relativePath),
+        datasetName: datasetNameFromPath(file.relativePath),
         coordinate: {
           row: match[1].toUpperCase(),
           column: Number.parseInt(match[2], 10),

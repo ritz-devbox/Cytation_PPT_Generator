@@ -1,4 +1,5 @@
 import type { IFileReader } from "../contracts/IFileReader";
+import type { ICountWorkbookReader } from "../contracts/ICountWorkbookReader";
 import type { PresentationConfig } from "../../domain/models/PresentationConfig";
 import type { PresentationResult } from "../../domain/models/PresentationResult";
 import type { PreparedImageSelection } from "../../domain/models/PreparedImageSelection";
@@ -10,19 +11,26 @@ import {
 import { GeneratePresentationService } from "../services/GeneratePresentationService";
 import { ParseImageSelectionService } from "../services/ParseImageSelectionService";
 import { ValidateImageMatrixService } from "../services/ValidateImageMatrixService";
+import { ApplyCountAnnotationsService } from "../services/ApplyCountAnnotationsService";
 
 export class PresentationController<TSource> {
   public constructor(
     private readonly fileReader: IFileReader<TSource>,
+    private readonly countWorkbookReader: ICountWorkbookReader<TSource>,
     private readonly parser: ParseImageSelectionService,
+    private readonly countAnnotator: ApplyCountAnnotationsService,
     private readonly validator: ValidateImageMatrixService,
     private readonly layoutBuilder: BuildSlideLayoutService,
     private readonly generator: Pick<GeneratePresentationService, "execute">,
   ) {}
 
   public async prepare(sources: readonly TSource[]): Promise<PreparedImageSelection> {
-    const files = await this.fileReader.readFiles(sources);
-    return this.validator.execute(this.parser.execute(files));
+    const [files, workbooks] = await Promise.all([
+      this.fileReader.readFiles(sources),
+      this.countWorkbookReader.read(sources),
+    ]);
+    const parsed = this.parser.execute(files);
+    return this.validator.execute(this.countAnnotator.execute(parsed, workbooks));
   }
 
   public buildPreview(

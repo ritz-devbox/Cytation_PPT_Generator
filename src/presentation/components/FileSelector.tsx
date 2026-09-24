@@ -7,11 +7,13 @@ import { collectDroppedFiles } from "../../infrastructure/files/collectDroppedFi
 
 interface FileSelectorProps {
   readonly isLoading: boolean;
+  readonly hasSelection?: boolean;
   readonly onSelect: (sources: readonly BrowserFileSource[]) => Promise<void>;
 }
 
-export function FileSelector({ isLoading, onSelect }: FileSelectorProps) {
-  const inputRef = useRef<HTMLInputElement>(null);
+export function FileSelector({ isLoading, hasSelection = false, onSelect }: FileSelectorProps) {
+  const folderInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -34,10 +36,14 @@ export function FileSelector({ isLoading, onSelect }: FileSelectorProps) {
   return (
     <section className="panel file-selector" aria-labelledby="select-files-title">
       <div>
-        <p className="eyebrow">Step 1</p>
-        <h2 id="select-files-title">Choose your image folder</h2>
+        <p className="eyebrow">Upload</p>
+        <h2 id="select-files-title">
+          {hasSelection ? "Add more images or folders" : "Choose images or folders"}
+        </h2>
         <p className="supporting-text">
-          Files stay on this computer. Folder names become the default row labels.
+          {hasSelection
+            ? "Add individual files or complete folders. Files stay on this computer."
+            : "Select individual JPG/XLSX files to inspect them in the file browser, or select a complete folder to preserve its name as the default row label."}
         </p>
       </div>
       <div
@@ -51,22 +57,47 @@ export function FileSelector({ isLoading, onSelect }: FileSelectorProps) {
         onDrop={handleDrop}
       >
         <span className="drop-icon" aria-hidden="true">+</span>
-        <strong>{isLoading ? "Reading images…" : "Drop a folder or JPG images here"}</strong>
+        <strong>
+          {isLoading
+            ? "Reading files…"
+            : hasSelection
+              ? "Drop another folder, JPG images, or XLSX file here"
+              : "Drop folders, JPG images, and an XLSX file here"}
+        </strong>
         <span>or</span>
-        <button
-          className="button button-secondary"
-          type="button"
-          disabled={isLoading}
-          onClick={() => inputRef.current?.click()}
-        >
-          Select folder
-        </button>
+        <div className="file-picker-actions">
+          <button
+            className="button button-primary"
+            type="button"
+            disabled={isLoading}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {hasSelection ? "Add files" : "Select files"}
+          </button>
+          <button
+            className="button button-secondary"
+            type="button"
+            disabled={isLoading}
+            onClick={() => folderInputRef.current?.click()}
+          >
+            {hasSelection ? "Add folder" : "Select folder"}
+          </button>
+        </div>
         <input
-          ref={inputRef}
+          ref={fileInputRef}
+          className="visually-hidden"
+          aria-label="File picker"
+          type="file"
+          accept=".jpg,.jpeg,.xlsx,image/jpeg,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+          multiple
+          onChange={handleChange}
+        />
+        <input
+          ref={folderInputRef}
           className="visually-hidden"
           aria-label="Folder picker"
           type="file"
-          accept=".jpg,.jpeg,image/jpeg"
+          accept=".jpg,.jpeg,.xlsx,image/jpeg,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
           multiple
           onChange={handleChange}
           {...({ webkitdirectory: "", directory: "" } as Record<string, string>)}

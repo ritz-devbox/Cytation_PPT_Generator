@@ -3,6 +3,7 @@ import { PresentationController } from "../../src/application/controllers/Presen
 import type { IFileReader } from "../../src/application/contracts/IFileReader";
 import type { InputFile } from "../../src/domain/models/InputFile";
 import { BuildSlideLayoutService } from "../../src/application/services/BuildSlideLayoutService";
+import { ApplyCountAnnotationsService } from "../../src/application/services/ApplyCountAnnotationsService";
 import { ParseImageSelectionService } from "../../src/application/services/ParseImageSelectionService";
 import { ValidateImageMatrixService } from "../../src/application/services/ValidateImageMatrixService";
 import { inputFile } from "../helpers/files";
@@ -16,7 +17,9 @@ describe("PresentationController", () => {
   it("coordinates reading, parsing, and validation without generation logic", async () => {
     const controller = new PresentationController(
       new FakeReader([inputFile("0gy", "B2")]),
+      { read: async () => [] },
       new ParseImageSelectionService(),
+      new ApplyCountAnnotationsService(),
       new ValidateImageMatrixService(),
       new BuildSlideLayoutService(),
       { execute: async () => ({ filename: "x.pptx", slideCount: 1, imageCount: 1, saveMethod: "download" }) },

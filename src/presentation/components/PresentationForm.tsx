@@ -62,8 +62,19 @@ export function PresentationForm({
 
   return (
     <section className="panel" aria-labelledby="layout-title">
-      <p className="eyebrow">Step 2</p>
+      <p className="eyebrow">Layout &amp; labels</p>
       <h2 id="layout-title">Configure the layout</h2>
+
+      <label className="field heading-field" htmlFor="first-slide-heading">
+        <span>First-slide heading</span>
+        <input
+          id="first-slide-heading"
+          type="text"
+          placeholder="Add an optional heading"
+          value={config.firstSlideHeading}
+          onChange={(event) => onConfigChange("firstSlideHeading", event.target.value)}
+        />
+      </label>
 
       <fieldset className="orientation-picker">
         <legend>Image ordering</legend>
@@ -107,6 +118,15 @@ export function PresentationForm({
       </fieldset>
 
       <div className="field-grid layout-fields">
+        <NumberField
+          id="rows-per-slide"
+          label="Rows per slide"
+          value={config.maxRowsPerSlide}
+          min={1}
+          step={1}
+          suffix=""
+          onChange={(value) => onConfigChange("maxRowsPerSlide", value)}
+        />
         <NumberField
           id="image-diameter"
           label="Preferred image diameter"

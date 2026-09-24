@@ -27,6 +27,12 @@ interface LogicalRow {
   readonly images: readonly ParsedImage[];
 }
 
+const annotationBandHeight = 0.2;
+const annotationTextHeight = 0.16;
+const annotationTopGap = 0.02;
+const headingHeight = 0.42;
+const headingBottomGap = 0.12;
+
 export class BuildSlideLayoutService {
   public getEditableRows(
     selection: PreparedImageSelection,
@@ -57,25 +63,55 @@ export class BuildSlideLayoutService {
     const imagesPerRow = Math.max(...logicalRows.map((row) => row.images.length));
     const availableWidth =
       config.slideWidth - config.marginLeft - config.marginRight - config.labelWidth;
-    const diameterThatFits =
+    const diameterThatFitsWidth =
       (availableWidth - config.horizontalGap * Math.max(0, imagesPerRow - 1)) / imagesPerRow;
-    const actualDiameter = Math.min(config.preferredDiameter, diameterThatFits);
-    if (actualDiameter <= 0) {
-      throw new ValidationError("The slide is too narrow for the selected images and spacing.");
-    }
-
-    const availableHeight = config.slideHeight - config.marginTop - config.marginBottom;
-    const rowsPerSlide = Math.max(
-      1,
-      Math.floor((availableHeight + config.verticalGap) / (actualDiameter + config.verticalGap)),
+    const rowsPerSlide = Math.min(config.maxRowsPerSlide, logicalRows.length);
+    const hasAnnotations = selection.images.some((image) => Boolean(image.annotation));
+    const rowAnnotationBand = hasAnnotations ? annotationBandHeight : 0;
+    const firstSlideHeading = config.firstSlideHeading.trim();
+    const headingBand = firstSlideHeading ? headingHeight + headingBottomGap : 0;
+    const availableHeight =
+      config.slideHeight - config.marginTop - config.marginBottom - headingBand;
+    const diameterThatFitsHeight =
+      (availableHeight -
+        rowAnnotationBand * rowsPerSlide -
+        config.verticalGap * Math.max(0, rowsPerSlide - 1)) /
+      rowsPerSlide;
+    const actualDiameter = Math.min(
+      config.preferredDiameter,
+      diameterThatFitsWidth,
+      diameterThatFitsHeight,
     );
+    if (actualDiameter <= 0) {
+      throw new ValidationError("The slide is too small for the selected images, rows, and spacing.");
+    }
     const slides: SlideDefinition[] = [];
 
     for (let start = 0; start < logicalRows.length; start += rowsPerSlide) {
+      const isFirstSlide = slides.length === 0;
+      const heading =
+        isFirstSlide && firstSlideHeading
+          ? {
+              text: firstSlideHeading,
+              x: config.marginLeft,
+              y: config.marginTop,
+              width: config.slideWidth - config.marginLeft - config.marginRight,
+              height: headingHeight,
+            }
+          : undefined;
+      const contentTop = config.marginTop + (heading ? headingBand : 0);
       const slideRows = logicalRows.slice(start, start + rowsPerSlide).map((row, rowIndex) =>
-        this.positionRow(row, rowIndex, actualDiameter, config, labels),
+        this.positionRow(
+          row,
+          rowIndex,
+          actualDiameter,
+          config,
+          labels,
+          contentTop,
+          rowAnnotationBand,
+        ),
       );
-      slides.push({ number: slides.length + 1, rows: slideRows });
+      slides.push({ number: slides.length + 1, heading, rows: slideRows });
     }
 
     return { slides, actualDiameter, imagesPerRow, rowsPerSlide };
@@ -119,8 +155,11 @@ export class BuildSlideLayoutService {
     diameter: number,
     config: PresentationConfig,
     labels: Readonly<Record<string, string>>,
+    contentTop: number,
+    rowAnnotationBand: number,
   ): PositionedSlideRow {
-    const y = config.marginTop + rowIndex * (diameter + config.verticalGap);
+    const y =
+      contentTop + rowIndex * (diameter + rowAnnotationBand + config.verticalGap);
     const firstImageX = config.marginLeft + config.labelWidth;
     return {
       key: row.key,
@@ -137,11 +176,16 @@ export class BuildSlideLayoutService {
         width: diameter,
         height: diameter,
         annotation: image.annotation,
+        annotationY: image.annotation ? y + diameter + annotationTopGap : undefined,
+        annotationHeight: image.annotation ? annotationTextHeight : undefined,
       })),
     };
   }
 
   private validateConfig(config: PresentationConfig): void {
+    if (!Number.isInteger(config.maxRowsPerSlide) || config.maxRowsPerSlide <= 0) {
+      throw new ValidationError("Rows per slide must be a positive whole number.");
+    }
     const positiveValues = [
       config.slideWidth,
       config.slideHeight,

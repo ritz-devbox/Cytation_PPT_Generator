@@ -21,6 +21,30 @@ function rowCoordinates(row: ReturnType<BuildSlideLayoutService["execute"]>["sli
 }
 
 describe("BuildSlideLayoutService", () => {
+  it("defaults to a maximum of three rows per slide", () => {
+    const result = layoutBuilder.execute({
+      selection: completeSelection(),
+      config: DEFAULT_PRESENTATION_CONFIG,
+      labels: {},
+    });
+
+    expect(result.rowsPerSlide).toBe(3);
+    expect(result.slides.map((slide) => slide.rows.length)).toEqual([3, 1]);
+  });
+
+  it("resizes images vertically when configured for more rows per slide", () => {
+    const result = layoutBuilder.execute({
+      selection: completeSelection(),
+      config: { ...DEFAULT_PRESENTATION_CONFIG, maxRowsPerSlide: 4 },
+      labels: {},
+    });
+
+    expect(result.rowsPerSlide).toBe(4);
+    expect(result.slides).toHaveLength(1);
+    expect(result.slides[0].rows).toHaveLength(4);
+    expect(result.actualDiameter).toBeLessThan(DEFAULT_PRESENTATION_CONFIG.preferredDiameter);
+  });
+
   it("interleaves datasets within each coordinate row in horizontal mode", () => {
     const result = layoutBuilder.execute({
       selection: completeSelection(),
@@ -63,5 +87,30 @@ describe("BuildSlideLayoutService", () => {
     expect(result.imagesPerRow).toBe(10);
     expect(result.actualDiameter).toBeLessThan(2.1);
     expect(result.slides[0].rows[0].cells).toHaveLength(10);
+  });
+
+  it("reserves first-slide heading space and positions counts below images", () => {
+    const baseSelection = completeSelection();
+    const selection = {
+      ...baseSelection,
+      images: baseSelection.images.map((image, index) => ({
+        ...image,
+        annotation: index === 0 ? "23" : undefined,
+      })),
+    };
+    const result = layoutBuilder.execute({
+      selection,
+      config: { ...DEFAULT_PRESENTATION_CONFIG, firstSlideHeading: "Experiment counts" },
+      labels: {},
+    });
+
+    expect(result.slides[0].heading?.text).toBe("Experiment counts");
+    expect(result.slides[1].heading).toBeUndefined();
+    expect(result.slides[0].rows[0].labelY).toBeGreaterThan(DEFAULT_PRESENTATION_CONFIG.marginTop);
+    const annotatedCell = result.slides[0].rows[0].cells[0];
+    expect(annotatedCell.annotation).toBe("23");
+    expect(annotatedCell.annotationY).toBeGreaterThanOrEqual(
+      annotatedCell.y + annotatedCell.height,
+    );
   });
 });

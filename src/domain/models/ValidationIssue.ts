@@ -7,7 +7,11 @@ export interface ValidationIssue {
     | "invalid-coordinate"
     | "duplicate-coordinate"
     | "missing-coordinate"
-    | "unreadable-file";
+    | "unreadable-file"
+    | "missing-count-workbook"
+    | "invalid-count-workbook"
+    | "missing-count-block"
+    | "missing-count-coordinate";
   readonly severity: ValidationSeverity;
   readonly message: string;
   readonly datasetName?: string;

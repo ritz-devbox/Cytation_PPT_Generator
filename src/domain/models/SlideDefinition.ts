@@ -7,6 +7,16 @@ export interface PositionedSlideCell {
   readonly width: number;
   readonly height: number;
   readonly annotation?: string;
+  readonly annotationY?: number;
+  readonly annotationHeight?: number;
+}
+
+export interface PositionedSlideHeading {
+  readonly text: string;
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
 }
 
 export interface PositionedSlideRow {
@@ -22,6 +32,7 @@ export interface PositionedSlideRow {
 
 export interface SlideDefinition {
   readonly number: number;
+  readonly heading?: PositionedSlideHeading;
   readonly rows: readonly PositionedSlideRow[];
 }
 

@@ -4,12 +4,15 @@ A browser-only React application that arranges locally selected Cytation JPG ima
 
 ## What it does
 
-- Select a root folder or drag image files/folders into the page.
+- Select a root folder or drag image files/folders and an XLSX count workbook into the page.
+- Append multiple folders, select folders to remove, and revalidate the remaining matrix without deleting files from disk.
 - Detect dataset names from subfolders such as `0gy` and `2gy`.
 - Detect coordinates from filename substrings such as `_B2_`.
 - Validate missing and duplicate coordinates before generation.
 - Preview horizontal or vertical ordering with an editable, 90-degree rotated label for every generated row.
-- Calculate circular image size and slide pagination automatically.
+- Default to three rows per slide, with a configurable row count and automatic circular image sizing.
+- Map workbook blocks to folders by displayed folder order and match counts by coordinates such as `B2`.
+- Show every mapped count, including zero, below its image and optionally add a centered heading to the first slide.
 - Save with the browser's native file picker when available, with a download fallback.
 
 All file reading and PowerPoint generation happens locally in the browser. No backend or upload service is used.
@@ -68,6 +71,6 @@ This creates the ignored file `smoke-output.pptx`.
 
 The deployment workflow calculates the Vite base path from the repository name. Pushes to `main` run tests, build the app, upload `dist`, and deploy it through GitHub Pages. Configure the repository's Pages source as **GitHub Actions** before the first deployment.
 
-## Future matrix annotations
+## Count workbook format
 
-The slide cell model supports an optional coordinate annotation. A later matrix-file reader can attach a folder-specific value to each image coordinate and render the value above its image without changing the ordering rules.
+Each count block starts with a row of numeric column headings, followed by rows whose first cell is a coordinate letter. The first detected image folder uses the first block, the second folder uses the second block, and so on; block labels such as `0gy` or `2gy` are not required. For example, image `B2` uses the value in row `B`, column `2` of its assigned block. Missing blocks or coordinates produce warnings, and mapped zero values are displayed as `0`.

@@ -1,9 +1,11 @@
 import { PresentationController } from "../application/controllers/PresentationController";
 import { BuildSlideLayoutService } from "../application/services/BuildSlideLayoutService";
+import { ApplyCountAnnotationsService } from "../application/services/ApplyCountAnnotationsService";
 import { GeneratePresentationService } from "../application/services/GeneratePresentationService";
 import { ParseImageSelectionService } from "../application/services/ParseImageSelectionService";
 import { ValidateImageMatrixService } from "../application/services/ValidateImageMatrixService";
 import { BrowserFileReader } from "../infrastructure/files/BrowserFileReader";
+import { BrowserCountWorkbookReader } from "../infrastructure/files/BrowserCountWorkbookReader";
 import { BrowserFileSaver } from "../infrastructure/files/BrowserFileSaver";
 import type { BrowserFileSource } from "../infrastructure/files/BrowserFileSource";
 import { ConsoleLogger } from "../infrastructure/logging/ConsoleLogger";
@@ -14,6 +16,7 @@ import { Sha256AccessTokenVerifier } from "../infrastructure/security/Sha256Acce
 
 const logger = new ConsoleLogger();
 const fileReader = new BrowserFileReader();
+const countWorkbookReader = new BrowserCountWorkbookReader();
 const fileSaver = new BrowserFileSaver();
 const imageBuilder = new CircularImageBuilder();
 const slideBuilder = new ImageMatrixSlideBuilder(imageBuilder);
@@ -26,7 +29,9 @@ const generatePresentationService = new GeneratePresentationService(
 
 export const presentationController = new PresentationController<BrowserFileSource>(
   fileReader,
+  countWorkbookReader,
   new ParseImageSelectionService(),
+  new ApplyCountAnnotationsService(),
   new ValidateImageMatrixService(),
   new BuildSlideLayoutService(),
   generatePresentationService,

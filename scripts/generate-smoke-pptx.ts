@@ -1,5 +1,7 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { readSheet } from "read-excel-file/node";
+import { ApplyCountAnnotationsService } from "../src/application/services/ApplyCountAnnotationsService";
 import { BuildSlideLayoutService } from "../src/application/services/BuildSlideLayoutService";
 import { ParseImageSelectionService } from "../src/application/services/ParseImageSelectionService";
 import { ValidateImageMatrixService } from "../src/application/services/ValidateImageMatrixService";
@@ -36,7 +38,15 @@ async function loadSampleFiles(): Promise<readonly InputFile[]> {
 }
 
 const parsed = new ParseImageSelectionService().execute(await loadSampleFiles());
-const selection = new ValidateImageMatrixService().execute(parsed);
+const workbookNames = (await readdir(inputRoot)).filter((name) => name.toLowerCase().endsWith(".xlsx"));
+const workbooks = await Promise.all(
+  workbookNames.map(async (filename) => ({
+    filename,
+    rows: await readSheet(path.join(inputRoot, filename)),
+  })),
+);
+const annotated = new ApplyCountAnnotationsService().execute(parsed, workbooks);
+const selection = new ValidateImageMatrixService().execute(annotated);
 const errors = selection.issues.filter((issue) => issue.severity === "error");
 if (errors.length > 0) {
   throw new Error(`Smoke input failed validation with ${errors.length} errors.`);
@@ -44,15 +54,18 @@ if (errors.length > 0) {
 
 const layout = new BuildSlideLayoutService().execute({
   selection,
-  config: DEFAULT_PRESENTATION_CONFIG,
+  config: { ...DEFAULT_PRESENTATION_CONFIG, firstSlideHeading: "Count matrix preview" },
   labels: Object.fromEntries(selection.datasets.map((dataset) => [dataset, dataset])),
 });
 const generator = new PptxGenJsPresentationGenerator(
   new ImageMatrixSlideBuilder(new CircularImageBuilder()),
 );
-const presentation = await generator.generate(layout.slides, DEFAULT_PRESENTATION_CONFIG);
+const presentation = await generator.generate(layout.slides, {
+  ...DEFAULT_PRESENTATION_CONFIG,
+  firstSlideHeading: "Count matrix preview",
+});
 await writeFile(outputPath, presentation.bytes);
 
 console.info(
-  `Generated ${path.basename(outputPath)} with ${layout.slides.length} slides and ${selection.images.length} images.`,
+  `Generated ${path.basename(outputPath)} with ${layout.slides.length} slides, ${selection.images.length} images, and ${selection.images.filter((image) => image.annotation !== undefined).length} mapped counts.`,
 );

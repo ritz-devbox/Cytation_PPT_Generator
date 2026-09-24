@@ -8,6 +8,22 @@ export class ImageMatrixSlideBuilder {
 
   public build(slide: PptxGenJS.Slide, definition: SlideDefinition, config: PresentationConfig): void {
     slide.background = { color: "FFFFFF" };
+    if (definition.heading) {
+      slide.addText(definition.heading.text, {
+        x: definition.heading.x,
+        y: definition.heading.y,
+        w: definition.heading.width,
+        h: definition.heading.height,
+        fontFace: "Aptos Display",
+        fontSize: 20,
+        color: "172033",
+        bold: true,
+        align: "center",
+        valign: "middle",
+        margin: 0,
+        fit: "shrink",
+      });
+    }
     for (const row of definition.rows) {
       slide.addText(row.label, {
         x: row.labelX,
@@ -27,14 +43,14 @@ export class ImageMatrixSlideBuilder {
       });
       for (const cell of row.cells) {
         this.imageBuilder.add(slide, cell);
-        if (cell.annotation) {
+        if (cell.annotation && cell.annotationY !== undefined && cell.annotationHeight !== undefined) {
           slide.addText(cell.annotation, {
             x: cell.x,
-            y: Math.max(0, cell.y - 0.22),
+            y: cell.annotationY,
             w: cell.width,
-            h: 0.18,
+            h: cell.annotationHeight,
             fontFace: "Aptos",
-            fontSize: 10,
+            fontSize: 9,
             color: "172033",
             align: "center",
             margin: 0,
