@@ -102,14 +102,14 @@ export function PresentationForm({
 
       <fieldset className="label-editor">
         <legend>Left-side row labels</legend>
-        <p className="field-help">Each generated row can have its own label. Folder names are used by default.</p>
+        <p className="field-help">Each generated row can have its own label. Folder and row names are used by default.</p>
         <div className="field-grid row-label-grid">
           {editableRows.map((row) => (
             <label className="field" key={row.key}>
               <span>{row.coordinateGroup} · {row.datasetName}</span>
               <input
                 type="text"
-                value={labels[row.key] ?? row.datasetName}
+                value={labels[row.key] ?? row.defaultLabel}
                 onChange={(event) => onLabelChange(row.key, event.target.value)}
               />
             </label>

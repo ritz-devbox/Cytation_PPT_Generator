@@ -138,7 +138,9 @@ describe("GeneratorPage", () => {
 
     expect(screen.getByText("B · 0gy")).toBeInTheDocument();
     expect(screen.getByText("C · 0gy")).toBeInTheDocument();
-    const label = screen.getAllByDisplayValue("0gy")[0];
+    expect(screen.getByDisplayValue("0gy_B")).toBeInTheDocument();
+    expect(screen.getByDisplayValue("0gy_C")).toBeInTheDocument();
+    const label = screen.getByDisplayValue("0gy_B");
     await user.clear(label);
     await user.type(label, "Control");
     expect(await screen.findAllByText("Control")).not.toHaveLength(0);

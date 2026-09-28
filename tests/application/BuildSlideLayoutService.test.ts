@@ -56,8 +56,32 @@ describe("BuildSlideLayoutService", () => {
     expect(rows.map((row) => row.key)).toEqual(["B:0gy", "B:2gy", "C:0gy", "C:2gy"]);
     expect(rowCoordinates(rows[0])).toEqual(["B2", "B3", "B4"]);
     expect(rows[0].label).toBe("Untreated B");
-    expect(rows[1].label).toBe("2gy");
+    expect(rows[1].label).toBe("2gy_B");
     expect(rows[2].label).toBe("Untreated C");
+  });
+
+  it("uses the folder and coordinate row as the default label", () => {
+    const selection = completeSelection();
+    const editableRows = layoutBuilder.getEditableRows(selection, "horizontal");
+    const result = layoutBuilder.execute({
+      selection,
+      config: DEFAULT_PRESENTATION_CONFIG,
+      labels: {},
+    });
+    const rows = result.slides.flatMap((slide) => slide.rows);
+
+    expect(editableRows.map((row) => row.defaultLabel)).toEqual([
+      "0gy_B",
+      "2gy_B",
+      "0gy_C",
+      "2gy_C",
+    ]);
+    expect(rows.map((row) => row.label)).toEqual([
+      "0gy_B",
+      "2gy_B",
+      "0gy_C",
+      "2gy_C",
+    ]);
   });
 
   it("transposes coordinates and preserves dataset interleaving in vertical mode", () => {
@@ -72,6 +96,7 @@ describe("BuildSlideLayoutService", () => {
       "2:0gy", "2:2gy", "3:0gy", "3:2gy", "4:0gy", "4:2gy",
     ]);
     expect(rowCoordinates(rows[0])).toEqual(["B2", "C2"]);
+    expect(rows[0].label).toBe("0gy_2");
   });
 
   it("shrinks circles to keep a complete row on one slide", () => {

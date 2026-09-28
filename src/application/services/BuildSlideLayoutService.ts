@@ -19,11 +19,13 @@ export interface EditableRowLabel {
   readonly key: string;
   readonly datasetName: string;
   readonly coordinateGroup: string;
+  readonly defaultLabel: string;
 }
 
 interface LogicalRow {
   readonly key: string;
   readonly datasetName: string;
+  readonly coordinateGroup: string;
   readonly images: readonly ParsedImage[];
 }
 
@@ -32,6 +34,10 @@ const annotationTextHeight = 0.16;
 const annotationTopGap = 0.02;
 const headingHeight = 0.42;
 const headingBottomGap = 0.12;
+
+function defaultRowLabel(datasetName: string, coordinateGroup: string): string {
+  return `${datasetName}_${coordinateGroup}`;
+}
 
 export class BuildSlideLayoutService {
   public getEditableRows(
@@ -47,6 +53,7 @@ export class BuildSlideLayoutService {
         key: `${coordinateGroup}:${datasetName}`,
         datasetName,
         coordinateGroup,
+        defaultLabel: defaultRowLabel(datasetName, coordinateGroup),
       })),
     );
   }
@@ -133,7 +140,12 @@ export class BuildSlideLayoutService {
           const images = selection.coordinateColumns
             .map((column) => byDatasetAndCoordinate.get(`${datasetName}:${coordinateRow}${column}`))
             .filter((image): image is ParsedImage => Boolean(image));
-          rows.push({ key: `${coordinateRow}:${datasetName}`, datasetName, images });
+          rows.push({
+            key: `${coordinateRow}:${datasetName}`,
+            datasetName,
+            coordinateGroup: coordinateRow,
+            images,
+          });
         }
       }
     } else {
@@ -142,7 +154,12 @@ export class BuildSlideLayoutService {
           const images = selection.coordinateRows
             .map((row) => byDatasetAndCoordinate.get(`${datasetName}:${row}${coordinateColumn}`))
             .filter((image): image is ParsedImage => Boolean(image));
-          rows.push({ key: `${coordinateColumn}:${datasetName}`, datasetName, images });
+          rows.push({
+            key: `${coordinateColumn}:${datasetName}`,
+            datasetName,
+            coordinateGroup: String(coordinateColumn),
+            images,
+          });
         }
       }
     }
@@ -164,7 +181,8 @@ export class BuildSlideLayoutService {
     return {
       key: row.key,
       datasetName: row.datasetName,
-      label: labels[row.key]?.trim() || row.datasetName,
+      label:
+        labels[row.key]?.trim() || defaultRowLabel(row.datasetName, row.coordinateGroup),
       labelX: config.marginLeft,
       labelY: y,
       labelWidth: Math.max(0.1, config.labelWidth - config.horizontalGap),
