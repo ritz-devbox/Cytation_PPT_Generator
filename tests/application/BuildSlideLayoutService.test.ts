@@ -99,6 +99,52 @@ describe("BuildSlideLayoutService", () => {
     expect(rows[0].label).toBe("0gy_2");
   });
 
+  it("creates compact horizontal rows only for populated sparse wells", () => {
+    const selection = validator.execute(
+      parser.execute([
+        ...[2, 3, 4, 6, 7, 8].map((column) => inputFile("0gy", `C${column}`)),
+        ...[2, 3, 4, 6, 7, 8].map((column) => inputFile("0gy", `G${column}`)),
+        ...[2, 3, 4].map((column) => inputFile("2gy", `C${column}`)),
+      ]),
+    );
+    const result = layoutBuilder.execute({
+      selection,
+      config: DEFAULT_PRESENTATION_CONFIG,
+      labels: {},
+    });
+    const rows = result.slides.flatMap((slide) => slide.rows);
+
+    expect(selection.issues).toEqual([]);
+    expect(rows.map((row) => row.key)).toEqual(["C:0gy", "C:2gy", "G:0gy"]);
+    expect(rowCoordinates(rows[0])).toEqual(["C2", "C3", "C4", "C6", "C7", "C8"]);
+    expect(rows[0].label).toBe("0gy_C");
+    expect(layoutBuilder.getEditableRows(selection, "horizontal").map((row) => row.key)).toEqual([
+      "C:0gy", "C:2gy", "G:0gy",
+    ]);
+  });
+
+  it("creates vertical rows only for populated sparse columns", () => {
+    const selection = validator.execute(
+      parser.execute([
+        inputFile("0gy", "C2"),
+        inputFile("0gy", "G2"),
+        inputFile("0gy", "C6"),
+        inputFile("2gy", "G6"),
+      ]),
+    );
+    const result = layoutBuilder.execute({
+      selection,
+      config: { ...DEFAULT_PRESENTATION_CONFIG, orientation: "vertical" },
+      labels: {},
+    });
+    const rows = result.slides.flatMap((slide) => slide.rows);
+
+    expect(rows.map((row) => row.key)).toEqual(["2:0gy", "6:0gy", "6:2gy"]);
+    expect(rowCoordinates(rows[0])).toEqual(["C2", "G2"]);
+    expect(rowCoordinates(rows[1])).toEqual(["C6"]);
+    expect(rowCoordinates(rows[2])).toEqual(["G6"]);
+  });
+
   it("shrinks circles to keep a complete row on one slide", () => {
     const selection = validator.execute(
       parser.execute(Array.from({ length: 10 }, (_, index) => inputFile("0gy", `B${index + 2}`))),

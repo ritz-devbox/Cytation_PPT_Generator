@@ -89,7 +89,7 @@ describe("GeneratorPage", () => {
       await screen.findByText("Excel workbook selected. Add JPG images or a folder to continue."),
     ).toBeInTheDocument();
     expect(screen.getByText("counts.xlsx")).toBeInTheDocument();
-    expect(screen.queryByText("The image matrix is incomplete")).not.toBeInTheDocument();
+    expect(screen.queryByText("The image selection has problems")).not.toBeInTheDocument();
     expect(controller.prepare).not.toHaveBeenCalled();
 
     fireEvent.change(filePicker, { target: { files: [image] } });

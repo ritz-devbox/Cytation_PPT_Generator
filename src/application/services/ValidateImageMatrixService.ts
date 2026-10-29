@@ -49,24 +49,6 @@ export class ValidateImageMatrixService {
       byDataset.set(image.datasetName, datasetImages);
     }
 
-    for (const datasetName of datasets) {
-      const datasetImages = byDataset.get(datasetName) ?? new Map<string, ParsedImage>();
-      for (const row of coordinateRows) {
-        for (const column of coordinateColumns) {
-          const key = `${row}${column}`;
-          if (!datasetImages.has(key)) {
-            issues.push({
-              code: "missing-coordinate",
-              severity: "error",
-              message: `${datasetName} is missing image ${key}.`,
-              datasetName,
-              coordinate: key,
-            });
-          }
-        }
-      }
-    }
-
     return {
       images: uniqueImages,
       datasets,

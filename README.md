@@ -8,7 +8,7 @@ A browser-only React application that arranges locally selected Cytation JPG ima
 - Append multiple folders, select folders to remove, and revalidate the remaining matrix without deleting files from disk.
 - Detect dataset names from subfolders such as `0gy` and `2gy`.
 - Detect coordinates from filename substrings such as `_B2_`.
-- Validate missing and duplicate coordinates before generation.
+- Accept sparse well selections while validating duplicate coordinates before generation.
 - Preview horizontal or vertical ordering with an editable, 90-degree rotated label for every generated row.
 - Default to three rows per slide, with a configurable row count and automatic circular image sizing.
 - Map workbook blocks to folders by displayed folder order and match counts by coordinates such as `B2`.

@@ -16,7 +16,7 @@ export function ValidationDialog({ issues, onClose }: ValidationDialogProps) {
         aria-labelledby="validation-title"
       >
         <div className="dialog-icon" aria-hidden="true">!</div>
-        <h2 id="validation-title">The image matrix is incomplete</h2>
+        <h2 id="validation-title">The image selection has problems</h2>
         <p>Correct these items and select the folder again before generating the presentation.</p>
         <ul>
           {errors.slice(0, 12).map((issue, index) => (

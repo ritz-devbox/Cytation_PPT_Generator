@@ -44,25 +44,19 @@ export class BuildSlideLayoutService {
     selection: PreparedImageSelection,
     orientation: PresentationConfig["orientation"],
   ): readonly EditableRowLabel[] {
-    const coordinateGroups =
-      orientation === "horizontal"
-        ? selection.coordinateRows
-        : selection.coordinateColumns.map(String);
-    return coordinateGroups.flatMap((coordinateGroup) =>
-      selection.datasets.map((datasetName) => ({
-        key: `${coordinateGroup}:${datasetName}`,
-        datasetName,
-        coordinateGroup,
-        defaultLabel: defaultRowLabel(datasetName, coordinateGroup),
-      })),
-    );
+    return this.createLogicalRows(selection, orientation).map((row) => ({
+      key: row.key,
+      datasetName: row.datasetName,
+      coordinateGroup: row.coordinateGroup,
+      defaultLabel: defaultRowLabel(row.datasetName, row.coordinateGroup),
+    }));
   }
 
   public execute(request: BuildSlideLayoutRequest): SlideLayoutResult {
     const { selection, config, labels } = request;
     this.validateConfig(config);
 
-    const logicalRows = this.createLogicalRows(selection, config);
+    const logicalRows = this.createLogicalRows(selection, config.orientation);
     if (logicalRows.length === 0) {
       return { slides: [], actualDiameter: 0, imagesPerRow: 0, rowsPerSlide: 0 };
     }
@@ -126,7 +120,7 @@ export class BuildSlideLayoutService {
 
   private createLogicalRows(
     selection: PreparedImageSelection,
-    config: PresentationConfig,
+    orientation: PresentationConfig["orientation"],
   ): readonly LogicalRow[] {
     const byDatasetAndCoordinate = new Map<string, ParsedImage>();
     for (const image of selection.images) {
@@ -134,18 +128,20 @@ export class BuildSlideLayoutService {
     }
 
     const rows: LogicalRow[] = [];
-    if (config.orientation === "horizontal") {
+    if (orientation === "horizontal") {
       for (const coordinateRow of selection.coordinateRows) {
         for (const datasetName of selection.datasets) {
           const images = selection.coordinateColumns
             .map((column) => byDatasetAndCoordinate.get(`${datasetName}:${coordinateRow}${column}`))
             .filter((image): image is ParsedImage => Boolean(image));
-          rows.push({
-            key: `${coordinateRow}:${datasetName}`,
-            datasetName,
-            coordinateGroup: coordinateRow,
-            images,
-          });
+          if (images.length > 0) {
+            rows.push({
+              key: `${coordinateRow}:${datasetName}`,
+              datasetName,
+              coordinateGroup: coordinateRow,
+              images,
+            });
+          }
         }
       }
     } else {
@@ -154,12 +150,14 @@ export class BuildSlideLayoutService {
           const images = selection.coordinateRows
             .map((row) => byDatasetAndCoordinate.get(`${datasetName}:${row}${coordinateColumn}`))
             .filter((image): image is ParsedImage => Boolean(image));
-          rows.push({
-            key: `${coordinateColumn}:${datasetName}`,
-            datasetName,
-            coordinateGroup: String(coordinateColumn),
-            images,
-          });
+          if (images.length > 0) {
+            rows.push({
+              key: `${coordinateColumn}:${datasetName}`,
+              datasetName,
+              coordinateGroup: String(coordinateColumn),
+              images,
+            });
+          }
         }
       }
     }

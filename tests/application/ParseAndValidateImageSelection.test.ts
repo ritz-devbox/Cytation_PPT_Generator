@@ -23,7 +23,7 @@ describe("image selection parsing and validation", () => {
     expect(result.issues).toEqual([]);
   });
 
-  it("reports duplicate and missing coordinates as blocking issues", () => {
+  it("accepts sparse coordinates while reporting duplicates as blocking issues", () => {
     const duplicate = inputFile("0gy", "B2", { name: "Duplicate_B2_1.jpg" });
     const result = validator.execute(
       parser.execute([
@@ -37,9 +37,9 @@ describe("image selection parsing and validation", () => {
     expect(result.issues).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ code: "duplicate-coordinate", datasetName: "0gy", coordinate: "B2" }),
-        expect.objectContaining({ code: "missing-coordinate", datasetName: "2gy", coordinate: "B3" }),
       ]),
     );
+    expect(result.issues).not.toContainEqual(expect.objectContaining({ code: "missing-coordinate" }));
   });
 
   it("ignores non-JPG files with a warning", () => {
