@@ -10,6 +10,7 @@ A browser-only React application that arranges locally selected Cytation JPG ima
 - Detect coordinates from filename substrings such as `_B2_`.
 - Accept sparse well selections while validating duplicate coordinates before generation.
 - Preview horizontal or vertical ordering with an editable, 90-degree rotated label for every generated row.
+- Label every image with its original well coordinate above the image.
 - Default to three rows per slide, with a configurable row count and automatic circular image sizing.
 - Map workbook blocks to folders by displayed folder order and match counts by coordinates such as `B2`.
 - Show every mapped count, including zero, below its image and optionally add a centered heading to the first slide.

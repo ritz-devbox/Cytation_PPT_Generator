@@ -117,6 +117,10 @@ describe("BuildSlideLayoutService", () => {
     expect(selection.issues).toEqual([]);
     expect(rows.map((row) => row.key)).toEqual(["C:0gy", "C:2gy", "G:0gy"]);
     expect(rowCoordinates(rows[0])).toEqual(["C2", "C3", "C4", "C6", "C7", "C8"]);
+    expect(rows[0].cells.map((cell) => cell.coordinateLabel)).toEqual([
+      "C2", "C3", "C4", "C6", "C7", "C8",
+    ]);
+    expect(rows[0].cells[0].coordinateLabelY).toBeLessThan(rows[0].cells[0].y);
     expect(rows[0].label).toBe("0gy_C");
     expect(layoutBuilder.getEditableRows(selection, "horizontal").map((row) => row.key)).toEqual([
       "C:0gy", "C:2gy", "G:0gy",
@@ -182,6 +186,9 @@ describe("BuildSlideLayoutService", () => {
     expect(annotatedCell.annotation).toBe("23");
     expect(annotatedCell.annotationY).toBeGreaterThanOrEqual(
       annotatedCell.y + annotatedCell.height,
+    );
+    expect(annotatedCell.coordinateLabelY + annotatedCell.coordinateLabelHeight).toBeLessThanOrEqual(
+      annotatedCell.y,
     );
   });
 });

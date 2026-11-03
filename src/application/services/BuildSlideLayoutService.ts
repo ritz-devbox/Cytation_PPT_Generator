@@ -32,6 +32,9 @@ interface LogicalRow {
 const annotationBandHeight = 0.2;
 const annotationTextHeight = 0.16;
 const annotationTopGap = 0.02;
+const coordinateLabelBandHeight = 0.18;
+const coordinateLabelTextHeight = 0.14;
+const coordinateLabelBottomGap = 0.02;
 const headingHeight = 0.42;
 const headingBottomGap = 0.12;
 
@@ -75,6 +78,7 @@ export class BuildSlideLayoutService {
       config.slideHeight - config.marginTop - config.marginBottom - headingBand;
     const diameterThatFitsHeight =
       (availableHeight -
+        coordinateLabelBandHeight * rowsPerSlide -
         rowAnnotationBand * rowsPerSlide -
         config.verticalGap * Math.max(0, rowsPerSlide - 1)) /
       rowsPerSlide;
@@ -174,7 +178,10 @@ export class BuildSlideLayoutService {
     rowAnnotationBand: number,
   ): PositionedSlideRow {
     const y =
-      contentTop + rowIndex * (diameter + rowAnnotationBand + config.verticalGap);
+      contentTop +
+      coordinateLabelBandHeight +
+      rowIndex *
+        (coordinateLabelBandHeight + diameter + rowAnnotationBand + config.verticalGap);
     const firstImageX = config.marginLeft + config.labelWidth;
     return {
       key: row.key,
@@ -191,6 +198,9 @@ export class BuildSlideLayoutService {
         y,
         width: diameter,
         height: diameter,
+        coordinateLabel: coordinateKey(image.coordinate),
+        coordinateLabelY: y - coordinateLabelTextHeight - coordinateLabelBottomGap,
+        coordinateLabelHeight: coordinateLabelTextHeight,
         annotation: image.annotation,
         annotationY: image.annotation ? y + diameter + annotationTopGap : undefined,
         annotationHeight: image.annotation ? annotationTextHeight : undefined,

@@ -63,13 +63,23 @@ export function SlidePreview({ layout, config }: SlidePreviewProps) {
                     {row.label}
                   </div>
                   {row.cells.map((cell) => {
-                    const coordinate = `${cell.image.coordinate.row}${cell.image.coordinate.column}`;
                     return (
                       <Fragment key={cell.image.file.id}>
+                      <span
+                        className="preview-cell-coordinate"
+                        style={{
+                          left: percent(cell.x, config.slideWidth),
+                          top: percent(cell.coordinateLabelY, config.slideHeight),
+                          width: percent(cell.width, config.slideWidth),
+                          height: percent(cell.coordinateLabelHeight, config.slideHeight),
+                        }}
+                      >
+                        {cell.coordinateLabel}
+                      </span>
                       <img
                         src={cell.image.file.content ?? ""}
-                        alt={`${cell.image.datasetName} ${coordinate}`}
-                        title={`${cell.image.datasetName} ${coordinate}`}
+                        alt={`${cell.image.datasetName} ${cell.coordinateLabel}`}
+                        title={`${cell.image.datasetName} ${cell.coordinateLabel}`}
                         style={{
                           left: percent(cell.x, config.slideWidth),
                           top: percent(cell.y, config.slideHeight),

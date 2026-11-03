@@ -42,6 +42,19 @@ export class ImageMatrixSlideBuilder {
         fit: "shrink",
       });
       for (const cell of row.cells) {
+        slide.addText(cell.coordinateLabel, {
+          x: cell.x,
+          y: cell.coordinateLabelY,
+          w: cell.width,
+          h: cell.coordinateLabelHeight,
+          fontFace: "Aptos",
+          fontSize: 9,
+          color: "172033",
+          bold: true,
+          align: "center",
+          margin: 0,
+          fit: "shrink",
+        });
         this.imageBuilder.add(slide, cell);
         if (cell.annotation && cell.annotationY !== undefined && cell.annotationHeight !== undefined) {
           slide.addText(cell.annotation, {

@@ -6,6 +6,9 @@ export interface PositionedSlideCell {
   readonly y: number;
   readonly width: number;
   readonly height: number;
+  readonly coordinateLabel: string;
+  readonly coordinateLabelY: number;
+  readonly coordinateLabelHeight: number;
   readonly annotation?: string;
   readonly annotationY?: number;
   readonly annotationHeight?: number;

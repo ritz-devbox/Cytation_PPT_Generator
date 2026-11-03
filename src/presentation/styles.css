@@ -286,6 +286,7 @@ legend, .field > span:first-child { font-size: 0.78rem; font-weight: 700; color:
 .slide-canvas img { position: absolute; display: block; border-radius: 50%; object-fit: cover; }
 .preview-slide-heading { position: absolute; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--navy); font-size: clamp(7px, 1.7vw, 20px); font-weight: 800; text-align: center; }
 .preview-row-label { position: absolute; display: flex; align-items: center; justify-content: center; overflow: hidden; font-weight: 800; color: var(--navy); font-size: clamp(6px, 1.25vw, 14px); white-space: nowrap; writing-mode: vertical-rl; transform: rotate(180deg); }
+.preview-cell-coordinate { position: absolute; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--navy); font-size: clamp(5px, 1vw, 11px); font-weight: 800; line-height: 1; }
 .preview-cell-annotation { position: absolute; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--navy); font-size: clamp(5px, 1vw, 11px); font-weight: 700; line-height: 1; }
 
 .generation-bar { position: sticky; bottom: 1rem; z-index: 5; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1rem 1.15rem; background: rgba(23, 32, 51, 0.95); color: #fff; border-radius: 14px; box-shadow: 0 14px 35px rgba(23, 32, 51, 0.24); backdrop-filter: blur(10px); }

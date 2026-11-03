@@ -80,6 +80,9 @@ describe("ImageMatrixSlideBuilder", () => {
               y: 1,
               width: 1,
               height: 1,
+              coordinateLabel: "B2",
+              coordinateLabelY: 0.84,
+              coordinateLabelHeight: 0.14,
               annotation: "0",
               annotationY: 2.02,
               annotationHeight: 0.16,
@@ -98,6 +101,10 @@ describe("ImageMatrixSlideBuilder", () => {
     expect(addText).toHaveBeenCalledWith(
       "Experiment counts",
       expect.objectContaining({ align: "center", y: 0.35 }),
+    );
+    expect(addText).toHaveBeenCalledWith(
+      "B2",
+      expect.objectContaining({ x: 1.1, y: 0.84, h: 0.14, align: "center" }),
     );
     expect(addText).toHaveBeenCalledWith(
       "0",
